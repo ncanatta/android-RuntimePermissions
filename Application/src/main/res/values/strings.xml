@@ -19,4 +19,8 @@
     <string name="permissions_not_granted">Permissions were not granted.</string>
     <string name="permission_camera_rationale">Camera permission is needed to show the camera preview.</string>
     <string name="permission_contacts_rationale">Contacts permissions are needed to demonstrate access.</string>
+
+    <string name="name">Name</string>
+    <string name="phone">Phone</string>
+    <string name="save_contact">Save Contact Info</string>
 </resources>

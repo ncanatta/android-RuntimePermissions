@@ -26,6 +26,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -35,7 +36,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -55,6 +58,9 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
 
     private static final String TAG = "Contacts";
     private TextView mMessageText = null;
+
+    private EditText name;
+    private EditText phone;
 
     private static String DUMMY_CONTACT_NAME = "__DUMMY CONTACT from runtime permissions sample";
 
@@ -83,16 +89,13 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_contacts, container, false);
 
+        name = (EditText) rootView.findViewById(R.id.name);
+        phone = (EditText) rootView.findViewById(R.id.phone);
         mMessageText = (TextView) rootView.findViewById(R.id.contact_message);
 
         // Register a listener to add a dummy contact when a button is clicked.
         Button button = (Button) rootView.findViewById(R.id.contact_add);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                insertDummyContact();
-            }
-        });
+        button.setOnClickListener(addContactListener());
 
         // Register a listener to display the first contact when a button is clicked.
         button = (Button) rootView.findViewById(R.id.contact_load);
@@ -104,6 +107,27 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
         });
         return rootView;
     }
+
+    @NonNull
+    private View.OnClickListener addContactListener() {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (name.getText().length() == 0) {
+                    Toast.makeText(view.getContext(), "Please enter a valid name",
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
+                if (phone.getText().length() == 0) {
+                    Toast.makeText(view.getContext(), "Please enter a valid phone number",
+                            Toast.LENGTH_LONG).show();
+                    return;
+                }
+                insertDummyContact();
+            }
+        };
+    }
+
 
     /**
      * Restart the Loader to query the Contacts content provider to display the first contact.
@@ -158,6 +182,7 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
      */
     private void insertDummyContact() {
         // Two operations are needed to insert a new contact.
+        Log.d(TAG, "Adding a new contact: " + this.name.getText() + " - "+ this.phone.getText());
         ArrayList<ContentProviderOperation> operations = new ArrayList<ContentProviderOperation>(2);
 
         // First, set up a new raw contact.
@@ -173,7 +198,7 @@ public class ContactsFragment extends Fragment implements LoaderManager.LoaderCa
                 .withValue(ContactsContract.Data.MIMETYPE,
                         ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
                 .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME,
-                        DUMMY_CONTACT_NAME);
+                        this.name.getText().toString());
         operations.add(op.build());
 
         // Apply the operations.
